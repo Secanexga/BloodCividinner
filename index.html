@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BlodCividiner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: klinik, sakin, projeksiyonda okunur; IDEA: kan yayması gibi akan dört kolon
+   PICTURE: bikonkav eritrosit logosu ve seçimle akan eritrosit; COLOUR: beyaz zemin, kan kırmızısı vurgu, sonuçta yeşil/turuncu/koyu kırmızı
+   TYPE: Source Sans 3, büyük gövde; LAYOUT: geniş ekranda 4 kolon tek ekran, dar ekranda alt alta */
+:root{color-scheme:light dark;
+--bg:light-dark(#fffafa,#170507);--panel:light-dark(#ffffff,#24090d);--ink:light-dark(#250609,#fbeef0);--soft:light-dark(#5b2a30,#e9c3c8);
+--blood:light-dark(#a3121f,#ff5a67);--deep:light-dark(#6b0a14,#ffb3ba);--line:light-dark(#e9c9cd,#4a1a20);--tint:light-dark(#fdeced,#3a0f15);
+--ok:light-dark(#1d6f37,#6fdc93);--okbg:light-dark(#e6f4ea,#11301c);--cut:light-dark(#a24e00,#ffb26b);--cutbg:light-dark(#fff1e2,#3a2208);
+--stop:light-dark(#8b0a14,#ff7b86);--stopbg:light-dark(#fde4e6,#40101a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:20px/1.4 "Source Sans 3",Arial,sans-serif;overflow-x:clip;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:16px;padding:12px max(2vw,14px);border-bottom:2px solid var(--line);position:relative;overflow:hidden}
+header h1{margin:0;font-size:34px;line-height:1.05;font-weight:800;color:var(--deep)}
+header p{margin:0;font-size:18px;color:var(--soft)}
+.logo{width:64px;height:64px;flex:none}
+.hbtn{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer}
+.btn{font-size:18px;font-weight:700;padding:10px 16px;min-height:44px;border-radius:999px;border:2px solid var(--blood);background:var(--panel);color:var(--blood)}
+.btn:hover{background:var(--tint)}
+.btn:focus-visible,.opt:focus-visible,input:focus-visible{outline:4px solid var(--blood);outline-offset:2px}
+.flow{position:absolute;left:0;bottom:2px;width:30px;height:18px;opacity:0;pointer-events:none}
+.flow.go{animation:flow 1.1s ease-in-out}
+@keyframes flow{0%{opacity:0;transform:translateX(0)}15%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translateX(calc(100vw - 40px)) rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.flow.go{animation:none}}
+main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.45fr);gap:14px;padding:14px max(2vw,14px);min-height:0}
+.col{background:var(--panel);border:2px solid var(--line);border-radius:18px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.col.on{border-color:var(--blood)}
+.col h2{margin:0;padding:12px 16px;font-size:24px;font-weight:800;display:flex;align-items:center;gap:10px;background:var(--tint);color:var(--deep)}
+.num{display:inline-grid;place-items:center;width:38px;height:30px;flex:none}
+.body{padding:12px;overflow-y:auto;flex:1}
+.grp{font-size:17px;font-weight:800;color:var(--blood);margin:14px 4px 6px}
+.grp:first-child{margin-top:2px}
+.opt{display:block;width:100%;text-align:left;padding:10px 14px;margin:0 0 8px;border:2px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);font-size:21px;line-height:1.25;min-height:48px}
+.opt b{font-weight:800}
+.opt small{display:block;font-size:17px;color:var(--soft);margin-top:2px}
+.opt:hover{border-color:var(--blood)}
+.opt.sel{border:3px solid var(--blood);background:var(--tint)}
+.opt.sel::after{content:"✓";float:right;font-weight:800;color:var(--blood)}
+.chip{display:inline-block;font-size:15px;font-weight:800;padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:2px;border:2px solid}
+.r-minimal{color:var(--ok);border-color:var(--ok)}.r-dusuk{color:var(--ok);border-color:var(--ok)}
+.r-orta{color:var(--cut);border-color:var(--cut)}.r-yuksek{color:var(--stop);border-color:var(--stop)}
+input[type=search]{width:100%;font:inherit;font-size:20px;padding:10px 12px;border:2px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);margin-bottom:6px}
+.q{margin-bottom:14px}.q h3{margin:4px 4px 8px;font-size:21px;font-weight:800}
+.empty{color:var(--soft);font-size:20px;padding:10px 6px}
+.verdict{border-radius:16px;padding:14px 16px;margin-bottom:12px;border:3px solid}
+.verdict .tag{font-size:16px;font-weight:800;letter-spacing:.02em}
+.verdict .big{font-size:30px;font-weight:800;line-height:1.1;margin-top:2px}
+.v-devam{color:var(--ok);background:var(--okbg);border-color:var(--ok)}
+.v-kes{color:var(--cut);background:var(--cutbg);border-color:var(--cut)}
+.v-ertele{color:var(--stop);background:var(--stopbg);border-color:var(--stop)}
+.who{font-size:19px;margin:0 2px 10px;color:var(--soft)}
+dl{margin:0}
+.row{display:grid;grid-template-columns:8.2em minmax(0,1fr);gap:10px;padding:9px 2px;border-bottom:1px solid var(--line)}
+dt{font-weight:800;color:var(--deep)}dd{margin:0}
+.warn{margin:12px 0 0;padding:0;list-style:none}
+.warn li{padding:8px 12px;margin-bottom:8px;border-radius:12px;background:var(--tint);font-size:19px}
+.warn li b{color:var(--deep)}
+.src{font-size:16px;color:var(--soft);margin-top:10px}
+footer{font-size:15px;color:var(--soft);padding:0 max(2vw,14px) 10px}
+@media (max-width:1100px){main{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}body{display:block}.col{max-height:none}.body{max-height:none;overflow:visible}}
+@media (max-width:700px){header{flex-wrap:wrap}.hbtn{margin-left:0;width:100%}main{grid-template-columns:minmax(0,1fr)}header h1{font-size:28px}header p{display:none}.row{grid-template-columns:minmax(0,1fr)}body{font-size:18px}.opt{font-size:19px}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="rbc" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#ff8a8f"/><stop offset=".45" stop-color="#d42a36"/><stop offset="1" stop-color="#7c0a14"/></radialGradient>
+    <radialGradient id="dimple" cx="50%" cy="55%" r="55%"><stop offset="0" stop-color="#9e1420"/><stop offset="1" stop-color="#c61f2c" stop-opacity="0"/></radialGradient>
+    <symbol id="cell" viewBox="0 0 100 100">
+      <ellipse cx="50" cy="56" rx="44" ry="38" fill="#000" opacity=".12"/>
+      <ellipse cx="50" cy="50" rx="44" ry="38" fill="url(#rbc)"/>
+      <ellipse cx="50" cy="52" rx="22" ry="17" fill="url(#dimple)"/>
+      <ellipse cx="38" cy="32" rx="14" ry="6" fill="#fff" opacity=".35"/>
+    </symbol>
+  </defs>
+</svg>
+<header>
+  <svg class="logo" aria-hidden="true"><use href="#cell"/></svg>
+  <div><h1>BlodCividiner</h1><p>Ürolojik girişim öncesi antikoagülan ve antiplatelet yönetimi</p></div>
+  <div class="hbtn"><button class="btn" id="reset">Baştan başla</button><button class="btn" id="fs">Tam ekran</button></div>
+  <svg class="flow" id="flow" aria-hidden="true"><use href="#cell"/></svg>
+</header>
+<main>
+  <section class="col on" id="c1"><h2><svg class="num"><use href="#cell"/></svg>1. İlaç</h2><div class="body"><input type="search" id="find" placeholder="İlaç ara (ör. Eliquis)" aria-label="İlaç ara"><div id="drugs"></div></div></section>
+  <section class="col" id="c2"><h2><svg class="num"><use href="#cell"/></svg>2. Girişim</h2><div class="body" id="procs"></div></section>
+  <section class="col" id="c3"><h2><svg class="num"><use href="#cell"/></svg>3. Sorular</h2><div class="body" id="qs"></div></section>
+  <section class="col" id="c4"><h2><svg class="num"><use href="#cell"/></svg>4. Öneri</h2><div class="body" id="out"></div></section>
+</main>
+<footer>Karar destek aracıdır; klinik değerlendirmenin ve kardiyoloji/hematoloji görüşünün yerine geçmez. Kaynaklar: Culkin 2014 (ICUD/AUA), Kanthabalan 2017 (BAUS), Browne 2017, Vasudeva 2009, Riya 2026 (StatPearls), Douketis 2026 (ACCP/ESC/AHA/ASRA özeti), Manchikanti 2024 (ASIPP). Ticari isimler örnektir.</footer>
+
+<script>
+{
+const DRUGS=[
+ ["Antiplatelet",[["Coraspin","asetilsalisilik asit","asa"],["Ecopirin","asetilsalisilik asit","asa"],["Dispril","asetilsalisilik asit","asa"],
+  ["Plavix","klopidogrel","clop"],["Karum","klopidogrel","clop"],["Planor","klopidogrel","clop"],["Klogel","klopidogrel","clop"],["Plavidol","klopidogrel","clop"],
+  ["Effient","prasugrel","pras"],["Brilinta","tikagrelor","tica"],["Pletal","silostazol","cilo"]]],
+ ["Varfarin ve heparinler",[["Coumadin","varfarin","vka"],["Clexane","enoksaparin","lmwh"],["Enox","enoksaparin","lmwh"],["Innohep","tinzaparin","lmwh"],["Fraxiparine","nadroparin","lmwh"],["Arixtra","fondaparinuks","fonda"]]],
+ ["Yeni oral antikoagülanlar",[["Pradaxa","dabigatran","dabi"],["Xarelto","rivaroksaban","xa"],["Rivoksar","rivaroksaban","xa"],["Onaxan","rivaroksaban","xa"],
+  ["Eliquis","apiksaban","xa"],["Apixenta","apiksaban","xa"],["Apaclot","apiksaban","xa"],["Apixelis","apiksaban","xa"],["Lixiana","edoksaban","xa"],["Edoxtra","edoksaban","xa"]]]
+];
+const RL={minimal:"Çok düşük",dusuk:"Düşük",orta:"Orta",yuksek:"Yüksek"};
+const PW={
+ turp:"<b>TUR-P:</b> Kan sulandırıcılarla kanama artar ve ameliyattan sonra da sürebilir; lazer gibi alternatif bir yöntem düşünülebilir. Aspirin kullananlarda kan verilme ihtimali 2,7 kat. (Culkin 2014; Vasudeva 2009)",
+ eswl:"<b>ESWL:</b> ICUD/AUA, ESWL öncesi ilaçların kesilmesini veya etkinin geri çevrilmesini önerir. ESWL'den 5 gün sonra ciddi kanama olguları var; tekrar başlarken dikkat. (Culkin 2014)",
+ pnl:"<b>PNL:</b> İlaçlar kesilmeli, gerekirse köprü yapılmalı. BAUS: yeni oral antikoagülanlar 72 saat önce (dabigatranda kreatinin klirensi 30-50 ise 96 saat). (Culkin 2014; Kanthabalan 2017)",
+ urs:"<b>Üreteroskopi:</b> ICUD/AUA'ya göre kan sulandırıcılar kesilmeden yapılabilir; kanıtlar çoğunlukla varfarin ve aspirin içindir. (Culkin 2014)",
+ lazer:"<b>Lazer prostatektomi:</b> INR'si uygun aralıktaki pıhtı riski yüksek hastada ilaç kesilmeden yapılabilir. HoLEP köprü serisinde ilaca dönüşte 34 hastanın 7'sine kan verildi. (Culkin 2014)",
+ trus:"<b>Prostat biyopsisi:</b> Düşük doz aspirinle güvenli, sadece hafif hematüri biraz artar. Varfarine devam edilen 49 hastada hematüri artmadı. (Culkin 2014)",
+ rp:"<b>Radikal prostatektomi:</b> Aspirin komplikasyonları artırmadı. Yüksek doz enoksaparin köprüsünde kan verilme 4,1 kat. (Culkin 2014)",
+ nefr:"<b>Böbrek ameliyatı:</b> Böbrek dokusu azaldıktan sonra eski yeni oral antikoagülan dozu fazla gelebilir. Parsiyel nefrektomi köprü ile yapılabilir ama kanama artar; 30 günde 5 pıhtı olayı bildirilmiş. (Culkin 2014)",
+ bbx:"<b>Böbrek biyopsisi:</b> Antiplatelete devam eden ve kesenler arasında büyük kanama farkı yok (1/75 ve 0/60). (Culkin 2014)",
+ dj:"<b>DJ stent:</b> Acil dekompresyon olarak büyük ameliyatın aciliyetini azaltabilir. (Culkin 2014)"
+};
+const PROCS=[
+ ["Yüksek kanama riski",[["TUR-P","yuksek","turp"],["TUR-M (mesane tümörü rezeksiyonu)","yuksek",""],["Perkütan nefrolitotomi (PNL)","yuksek","pnl"],["ESWL","yuksek","eswl"],
+  ["Radikal prostatektomi / sistektomi (açık-laparoskopik)","yuksek","rp"],["Parsiyel veya radikal nefrektomi","yuksek","nefr"],["Penis kanseri ameliyatı","yuksek",""],["Perkütan böbrek biyopsisi","yuksek","bbx"]]],
+ ["Orta kanama riski",[["Transrektal prostat biyopsisi","orta","trus"],["Mesane veya üreter biyopsisi","orta",""],["Suprapubik sonda takılması","orta",""],["Kasık-skrotum ameliyatları","orta",""],
+  ["Mesane hidrodistansiyonu","orta",""],["Mesane boynu insizyonu","orta",""],["TVT","orta",""],["Penil protez","orta",""],["Üretra rekonstrüksiyonu","orta",""]]],
+ ["Düşük kanama riski",[["Üreteroskopi ± taş çıkarma","dusuk","urs"],["Lazer litotripsi","dusuk","urs"],["Lazer prostatektomi (HoLEP, PVP)","dusuk","lazer"],["Üreteroskopik tümör lazer tedavisi","dusuk",""]]],
+ ["Çok düşük kanama riski",[["Tanısal sistoskopi","minimal",""],["DJ stent takılması / değişimi","minimal","dj"]]]
+];
+const ANES={id:"an",t:"Anestezi tipi",o:[["gen","Genel anestezi veya sedasyon"],["spi","Spinal veya epidural anestezi"]]};
+const CRCL={id:"cr",t:"Kreatinin klirensi (mL/dk)",o:[["80","80 ve üzeri"],["50","50-79"],["30","30-49"],["15","15-29"],["0","15'in altı veya diyaliz"]]};
+const QS={
+ xa:[CRCL,ANES], dabi:[CRCL,ANES],
+ vka:[{id:"te",t:"Hastanın pıhtı riski",o:[["y","Yüksek","Mekanik mitral veya eski tip kapak; son 3 ayda inme/TİA veya VTE; CHA2DS2-VASc 7 ve üzeri; romatizmal kapak; ağır trombofili"],["o","Orta","Ek risk faktörlü aort kapak; CHA2DS2-VASc 5-6; 3-12 ay önce VTE; aktif kanser"],["d","Düşük","Risk faktörsüz aort kapak; CHA2DS2-VASc 1-4; 12 aydan eski VTE"]]},ANES],
+ lmwh:[{id:"ds",t:"Doz",o:[["p","Koruyucu doz","Ör. enoksaparin 40 mg günde 1"],["t","Tedavi dozu / köprü","Ör. enoksaparin 1 mg/kg günde 2 veya 1,5 mg/kg günde 1"]]},ANES],
+ fonda:[{id:"cr2",t:"Kreatinin klirensi (mL/dk)",o:[["h","30 ve üzeri"],["l","30'un altı"]]}],
+ asa:[{id:"in",t:"Aspirini neden kullanıyor?",o:[["pri","Sadece koruma amaçlı","Belirgin bir hastalığı yok"],["sek","Kalp-damar hastalığı var, stent yok","Koroner hastalık, periferik arter hastalığı"],["inme","Geçirilmiş inme, özellikle yakın zamanda",""],["stdis","Stent var, ikili tedavi süresi dolmuş",""],["stin","Stent yeni","Metal stent 3 aydan, ilaçlı stent 12 aydan kısa"]]}],
+ p2y:[{id:"du",t:"Hastanın durumu",o:[["tek","Stent yok, tek başına kullanıyor","Ör. inme veya periferik arter hastalığı"],["dis","Aspirinle birlikte, stent süresi dolmuş",""],["in","Stent yeni","Metal stent 3 aydan, ilaçlı stent 12 aydan kısa"]]},ANES],
+ cilo:[ANES]
+};
+const qKey=k=>({clop:"p2y",pras:"p2y",tica:"p2y"}[k]||k);
+const st={drug:null,proc:null,ans:{}};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function renderDrugs(){
+  const f=($("#find").value||"").toLocaleLowerCase("tr");
+  $("#drugs").innerHTML=DRUGS.map(([g,l])=>{
+    const m=l.filter(d=>!f||(d[0]+" "+d[1]).toLocaleLowerCase("tr").includes(f));
+    if(!m.length)return"";
+    return`<div class="grp">${g}</div>`+m.map(d=>`<button class="opt${st.drug&&st.drug[0]===d[0]?" sel":""}" data-d="${esc(d[0])}"><b>${esc(d[0])}</b> (${esc(d[1])})</button>`).join("");
+  }).join("")||`<div class="empty">Eşleşen ilaç yok.</div>`;
+}
+function renderProcs(){
+  if(!st.drug){$("#procs").innerHTML=`<div class="empty">Önce soldan bir ilaç seçin.</div>`;return}
+  $("#procs").innerHTML=PROCS.map(([g,l])=>`<div class="grp">${g}</div>`+l.map(p=>`<button class="opt${st.proc&&st.proc[0]===p[0]?" sel":""}" data-p="${esc(p[0])}">${esc(p[0])}<span class="chip r-${p[1]}">${RL[p[1]]}</span></button>`).join("")).join("");
+}
+function renderQs(){
+  if(!st.drug||!st.proc){$("#qs").innerHTML=`<div class="empty">${st.drug?"Bir girişim seçin.":"Önce ilaç ve girişim seçin."}</div>`;return}
+  let qs=QS[qKey(st.drug[2])]||[];
+  $("#qs").innerHTML=qs.length?qs.map(q=>`<div class="q"><h3>${q.t}</h3>`+q.o.map(o=>`<button class="opt${st.ans[q.id]===o[0]?" sel":""}" data-q="${q.id}" data-v="${o[0]}">${o[1]}${o[2]?`<small>${o[2]}</small>`:""}</button>`).join("")+`</div>`).join(""):`<div class="empty">Bu ilaç için ek soru yok.</div>`;
+}
+const need=()=>(QS[qKey(st.drug[2])]||[]).filter(q=>!st.ans[q.id]);
+
+function advise(){
+  const k=st.drug[2],r=st.proc[1],an=st.ans.an,spi=an==="spi",nm=st.drug[0]+" ("+st.drug[1]+")";
+  const R=(v,big,rows,warn,src)=>({v,big,rows,warn:warn||[],src});
+  const hi=r==="yuksek";
+  const dayW={clop:"5 gün",pras:"7 gün",tica:"3-5 gün"};
+  if(k==="xa"||k==="dabi"){
+    const cr=st.ans.cr;
+    if(cr==="15"||cr==="0")return R("ertele","Uzmana danışın",[["Son doz","Bu böbrek fonksiyonunda rutin şema yoktur. İlaca özgü plan hematoloji/kardiyoloji ile yapılmalıdır."],["Köprü","Rutin köprü önerilmez."]],[],"Riya 2026");
+    if(r==="minimal"&&!spi)return R("devam","Kesmeyin",[["Son doz","İlaca devam edilir. Pik etkiden kaçınmak için işlem sabahı dozu atlanır."],["Köprü","Gerekmez."],["Sonra","Hemostaz sağlanınca olağan doza dönülür."]],["AUA/ICUD: çok az kanama riskli işlemde doz değiştirmeye gerek yoktur."],"Douketis 2026; Culkin 2014");
+    let days,post;
+    if(spi){days=k==="xa"?"En az 72 saat önce son doz (3 tam gün).":(cr==="30"?"En az 120 saat önce son doz (5 tam gün).":"En az 72 saat önce son doz (3 tam gün).");}
+    else if(k==="xa")days=hi?"2 tam gün önce kesilir (son dozdan sonra yaklaşık 60-68 saat).":"1 tam gün önce kesilir (son dozdan sonra yaklaşık 30-36 saat).";
+    else days=hi?(cr==="30"?"4 tam gün önce kesilir.":"2 tam gün önce kesilir."):(cr==="30"?"2 tam gün önce kesilir.":"1 tam gün önce kesilir.");
+    post=hi?"Hemostaz sağlandıktan sonra 48-72. saatte başlanır.":"Hemostaz sağlandıktan sonra en erken 24. saatte başlanır.";
+    if(spi)post+=" İğne veya kateter çekildikten en az 24 saat sonra.";
+    const w=[];
+    if(!hi&&r==="orta")w.push("<b>BAUS daha temkinli:</b> orta riskli işlemleri yüksek riskle birlikte değerlendirir ve 72 saat önce kesmeyi önerir.");
+    if(r==="dusuk")w.push("<b>BAUS:</b> düşük riskli işlemde son doz apiksaban için 24 saat, rivaroksaban ve dabigatran için 48 saat önce. AUA/ICUD: üreteroskopi ilaç kesilmeden yapılabilir.");
+    return R("kes",spi?"Kesin (anestezi kuralı)":"Kesin",[["Son doz",days+" Ameliyat günü doz alınmaz."],["Köprü","Yapılmaz (yeni oral antikoagülanlarda rutin köprü önerilmez)."],["Sonra",post+" Başlama gecikirse koruyucu dozda düşük molekül ağırlıklı heparin (ör. enoksaparin 40 mg/gün)."]],w,"Riya 2026; Douketis 2026; Kanthabalan 2017; Culkin 2014");
+  }
+  if(k==="vka"){
+    const te=st.ans.te;
+    if((r==="minimal"||r==="dusuk")&&!spi)return R("devam","Kesmeyin",[["Son doz",r==="minimal"?"Varfarine devam edilir; işlem günü INR 3'ün altında olmalıdır.":"Varfarine devam edilebilir; INR uygun aralıkta olmalı, işlemden önce INR bakılmalıdır."],["Köprü","Gerekmez."],["Sonra","Olağan doza devam."]],
+      r==="dusuk"?["ICUD/AUA metninde ayrıca lazer prostatektomide varfarin yerine düşük molekül ağırlıklı heparin köprüsünün tercih edilebileceği de yazar; hastaya göre karar verin."]:[],"Douketis 2026; Culkin 2014; Kanthabalan 2017");
+    const br=te==="y"?`Köprü önerilir: INR terapötik aralığın altına inince (yaklaşık 3 gün önce) tedavi dozunda düşük molekül ağırlıklı heparin; son doz ameliyattan en az 24 saat önce. Kardiyoloji ile planlayın.`:te==="o"?"Rutin değil. Hastaya göre karar; kardiyoloji görüşü alın.":"Gerekmez (köprü kanamayı yaklaşık 3 kat artırır, pıhtıyı azaltmaz).";
+    let post="Ameliyattan 12-24 saat sonra (genellikle ertesi akşam) olağan dozla başlanır.";
+    if(te==="y")post+=hi?" Heparine 48-72. saatte başlanır, INR iki kez uygun aralıkta olunca kesilir.":" Heparine en erken 24. saatte başlanır, INR iki kez uygun aralıkta olunca kesilir.";
+    return R("kes","Kesin",[["Son doz","Ameliyattan 5 gün önce kesilir. Bir gün önce INR bakılır; 1,5 veya üzerindeyse ağızdan 1-2,5 mg vitamin K verilir. INR 1,5 ve altında çoğu ameliyat güvenle yapılır."+(spi?" Spinal/epidural için INR normal olmalı; kateter çekilirken INR 1,5'in altında olmalıdır.":"")],["Köprü",br],["Sonra",post]],
+      ["INR düşüş hızı değişkendir: 50 yaş altında 3 gün yetebilir, 75 yaş üstünde veya beslenme bozukluğunda 5 günden fazla gerekebilir."],"Riya 2026; Douketis 2026; Culkin 2014; Kanthabalan 2017");
+  }
+  if(k==="lmwh"){
+    const t=st.ans.ds==="t";
+    return R("kes","Kesin",[["Son doz",t?"Son tedavi dozu ameliyattan en az 24 saat önce (BAUS: günlük dozun yarısı olarak).":"Son koruyucu doz ameliyattan en az 12 saat önce."+(spi?" (spinal/epidural kuralı)":" Kaynaklarda genel anestezi için ayrı süre verilmemiştir; nöroaksiyel kuralı alınmıştır.")],
+      ["Böbrek","Kreatinin klirensi 30'un altında doz azaltılır veya daha uzun ara verilir; standart heparin bir seçenektir."],
+      ["Sonra",t?(hi?"Hemostaz sağlandıktan sonra 48-72. saatte.":"Hemostaz sağlandıktan sonra en erken 24. saatte."):"Kanama kontrol altına alınınca koruyucu doza dönülür."+(spi?" Spinal sonrası zamanlama doz ve kateter durumuna göre belirlenir.":"")]],
+      [],"Riya 2026; Kanthabalan 2017; Culkin 2014");
+  }
+  if(k==="fonda"){
+    if(st.ans.cr2==="l")return R("ertele","Uzmana danışın",[["Not","Kreatinin klirensi 30'un altında fondaparinuks kontrendikedir. Hematoloji ile ilaç değişimi planlanmalıdır."]],[],"Riya 2026");
+    return R("ertele","Uzmana danışın",[["Not","Yarılanma ömrü 17-21 saat; etkisi 2-4 gün sürebilir. Elimizdeki kaynaklarda ürolojik cerrahi için net bir kesme süresi yoktur. Hematoloji ile plan yapılmalıdır."],["Antidot","Özel antidotu yoktur."]],[],"Riya 2026; Kanthabalan 2017");
+  }
+  if(k==="asa"){
+    const i=st.ans.in;
+    if(i==="stin")return R("ertele","Ameliyatı erteleyin",[["Öneri","Elektif işlem ertelenir. Mecbursa aspirin ve diğer ilaca devam edilir; kardiyoloji ile birlikte karar verilir."],["Seçenek","Daha az kanatan yöntem: üreteroskopi, lazer, DJ stent veya nefrostomi."]],["Bu dönemde ilaç kesilirse ciddi kalp olayı ve ölüm oranı yüzde 10-46."],"Culkin 2014; Riya 2026");
+    if(i==="pri")return R("kes","Kesin",[["Son doz","Elektif işlemde aspirin kesilir (yaklaşık 7 gün önce)."],["Sonra","Cerrahi ekip uygun gördüğünde başlanır."]],[],"Culkin 2014; Vasudeva 2009; Riya 2026");
+    const rows=[];
+    if(hi&&st.proc[2]==="turp")rows.push(["Öneri","Kanama artar. Kalp riski yüksekse aspirine devam edip lazer gibi alternatif düşünün; kesilecekse en az 7 gün önce. Kardiyoloji ile birlikte karar."]);
+    else if(hi)rows.push(["Öneri","Genellikle devam edilir. ACCP/ESC yüksek kanama riskli işlemde en az 7 gün (AHA/ACC 4 gün) önce kesmeyi önerir; kalp riski yüksekse devam etmek daha güvenlidir. Hastaya göre karar."]);
+    else rows.push(["Öneri","Aspirine devam edilir; büyük kanama riski artmaz."]);
+    if(i==="inme")rows.push(["Ek","Nöroloji görüşü alınmalıdır."]);
+    rows.push(["Spinal","Aspirin tek başına spinal/epidural için kesilmeyi gerektirmez."]);
+    rows.push(["Sonra","Kesildiyse 24 saat içinde (ESC: 48 saat) başlanır."]);
+    return R(hi?"kes":"devam",hi?"Genellikle devam; bireysel karar":"Kesmeyin",rows,["Aspirin aniden kesilirse pıhtılaşma eğilimi artar (rebound)."],"Culkin 2014; Vasudeva 2009; Douketis 2026; Riya 2026");
+  }
+  if(k==="clop"||k==="pras"||k==="tica"){
+    const d=st.ans.du;
+    if(d==="in")return R("ertele","Ameliyatı erteleyin",[["Öneri","Elektif işlem ertelenir. Mecbursa aspirin ve "+st.drug[1]+" birlikte sürdürülür; kardiyoloji ile karar. Seçilmiş vakada damardan kangrelor köprüsü."],["Seçenek","Daha az kanatan yöntem: üreteroskopi, lazer, DJ stent veya nefrostomi."]],["Bu dönemde ilaç kesilirse ciddi kalp olayı ve ölüm oranı yüzde 10-46."],"Culkin 2014; Riya 2026; Douketis 2026");
+    if(r==="minimal"&&!spi)return R("devam","Kesmeyin",[["Öneri","Çok az kanama riskli işlemde antiplatelete devam edilebilir."]],[],"Douketis 2026");
+    const days=spi?{clop:"5-7 gün",pras:"7 gün",tica:"5 gün"}[k]:dayW[k];
+    const rows=[["Son doz",st.drug[1][0].toLocaleUpperCase("tr")+st.drug[1].slice(1)+" ameliyattan "+days+" önce kesilir."+(spi?" (spinal/epidural kuralı)":"")]];
+    rows.push(["Aspirin",d==="dis"?"Aspirine devam edilir.":"Aspirinle köprü konusunda kaynaklar farklı: BAUS önermez; ICUD/AUA inme hastasında aspirine devamı önerir. Nöroloji/kardiyoloji ile karar."]);
+    rows.push(["Sonra","Hemostaz sağlanınca 24 saat içinde (ESC: 48 saat) başlanır."+(k!=="clop"?" Etkisi hızlı ve güçlüdür, geri çevrilemez; dikkatle başlayın.":"")]);
+    return R("kes","Kesin",rows,["Kanama olursa tek çare trombosit verilmesidir; son klopidogrel dozundan 6-8 saat sonra verilen trombositler ilaçtan pek etkilenmez."],"Douketis 2026; Riya 2026; Culkin 2014; Kanthabalan 2017; Vasudeva 2009");
+  }
+  if(k==="cilo"){
+    if(spi)return R("kes","Kesin",[["Son doz","2 gün önce kesilir (spinal/epidural kuralı)."],["Sonra","İlk doz kateter çekildikten en az 6 saat sonra."]],[],"Riya 2026");
+    if(hi)return R("kes","Kesin",[["Son doz","Yüksek riskli işlemde 2 gün önce kesilebilir (veya devam)."],["Sonra","Hemostaz sağlanınca başlanır."]],[],"Manchikanti 2024");
+    return R("devam","Kesmeyin",[["Öneri","Düşük ve orta riskli işlemde devam edilebilir."]],[],"Manchikanti 2024");
+  }
+}
+function renderOut(){
+  const o=$("#out");
+  if(!st.drug||!st.proc){o.innerHTML=`<div class="empty">İlaç ve girişim seçildiğinde öneri burada görünür.</div>`;return}
+  const n=need();
+  if(n.length){o.innerHTML=`<div class="empty">3. kolondaki soruyu yanıtlayın: <b>${n.map(q=>q.t).join(", ")}</b></div>`;return}
+  const a=advise(),tags={devam:"DEVAM",kes:"KES",ertele:"ERTELE / DANIŞ"};
+  const pw=st.proc[2]&&PW[st.proc[2]]?[PW[st.proc[2]]]:[];
+  o.innerHTML=`<div class="verdict v-${a.v}"><div class="tag">${tags[a.v]}</div><div class="big">${a.big}</div></div>
+   <p class="who"><b>${esc(st.drug[0])} (${esc(st.drug[1])})</b> · ${esc(st.proc[0])} · kanama riski ${RL[st.proc[1]].toLocaleLowerCase("tr")}</p>
+   <dl>${a.rows.map(([d,t])=>`<div class="row"><dt>${d}</dt><dd>${t}</dd></div>`).join("")}</dl>
+   ${a.warn.concat(pw).length?`<ul class="warn">${a.warn.concat(pw).map(w=>`<li>${w}</li>`).join("")}</ul>`:""}
+   <div class="src">Kaynak: ${a.src}</div>`;
+}
+function marks(){
+  $("#c1").classList.toggle("on",!st.drug);
+  $("#c2").classList.toggle("on",!!st.drug&&!st.proc);
+  $("#c3").classList.toggle("on",!!st.proc&&need().length>0);
+  $("#c4").classList.toggle("on",!!st.proc&&need().length===0);
+}
+function flow(){const f=$("#flow");f.classList.remove("go");void f.offsetWidth;f.classList.add("go")}
+function all(){renderDrugs();renderProcs();renderQs();renderOut();marks()}
+function find(list,name){for(const[,l]of list)for(const x of l)if(x[0]===name)return x}
+$("#drugs").addEventListener("click",e=>{const b=e.target.closest("[data-d]");if(!b)return;const d=find(DRUGS,b.dataset.d);if(!st.drug||qKey(st.drug[2])!==qKey(d[2]))st.ans={};st.drug=d;flow();all()});
+$("#procs").addEventListener("click",e=>{const b=e.target.closest("[data-p]");if(!b)return;st.proc=find(PROCS,b.dataset.p);flow();all()});
+$("#qs").addEventListener("click",e=>{const b=e.target.closest("[data-q]");if(!b)return;st.ans[b.dataset.q]=b.dataset.v;flow();all()});
+$("#find").addEventListener("input",renderDrugs);
+$("#reset").addEventListener("click",()=>{st.drug=null;st.proc=null;st.ans={};$("#find").value="";all()});
+$("#fs").addEventListener("click",()=>{try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(()=>{})}catch(_){}});
+all();
+}
+</script>
+</body>
+</html>
